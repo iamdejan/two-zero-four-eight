@@ -98,14 +98,14 @@ public class ConsoleGame implements Game {
 
     private Move inputMove() {
         try {
-            return askInput();
+            return tryAskInput();
         } catch (UnsupportedOperationException e) {
             messageOptional = Optional.of("Unsupported move! You should input either W, A, S, or D!");
             return Move.UNSUPPORTED;
         }
     }
 
-    private Move askInput() {
+    private Move tryAskInput() {
         System.out.print("Enter direction: ");
         final String input = reader.nextLine();
         return Move.parse(input);

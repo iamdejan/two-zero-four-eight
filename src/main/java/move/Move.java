@@ -16,7 +16,7 @@ public enum Move {
 
     public static Move parse(final String input) {
         for(Move move: values()) {
-            if(move.keyboardInput.equals(input)) {
+            if(move.keyboardInput.equalsIgnoreCase(input)) {
                 return move;
             }
         }

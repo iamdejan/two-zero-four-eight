@@ -4,6 +4,7 @@ import game.State;
 import move.Move;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -27,10 +28,10 @@ public class Board {
 
     public void addRandomNumbers(final int count) {
         for (int i = 1; i <= count; i++) {
-            while(true) {
+            while (true) {
                 int r = random.nextInt(grid.length);
                 int c = random.nextInt(grid.length);
-                if(grid[r][c] != EMPTY) {
+                if (grid[r][c] != EMPTY) {
                     grid[r][c] = 2;
                     break;
                 }
@@ -39,7 +40,103 @@ public class Board {
     }
 
     public void handleMove(final Move move) {
-        // TODO dejan: implement this
+        // TODO dejan: refactor into strategy pattern
+        switch (move) {
+            case UP -> {
+                for (int c = 0; c < grid.length; c++) {
+                    final LinkedList<Integer> queue = new LinkedList<>();
+                    for (int r = 0; r < grid.length; r++) {
+                        if (grid[c][r] == EMPTY) {
+                            continue;
+                        }
+
+                        if (queue.isEmpty() || queue.getLast() != grid[c][r]) {
+                            queue.add(grid[c][r]);
+                        } else {
+                            queue.add(queue.removeLast() + grid[c][r]);
+                        }
+                    }
+                    while (queue.size() < grid.length) {
+                        queue.addLast(EMPTY);
+                    }
+
+                    for (int r = 0; r < grid.length; r++) {
+                        grid[r][c] = queue.removeFirst();
+                    }
+                }
+            }
+            case DOWN -> {
+                for (int c = 0; c < grid.length; c++) {
+                    final LinkedList<Integer> queue = new LinkedList<>();
+                    for (int r = grid.length - 1; r >= 0; r--) {
+                        if (grid[c][r] == EMPTY) {
+                            continue;
+                        }
+
+                        if (queue.isEmpty() || queue.getLast() != grid[c][r]) {
+                            queue.add(grid[c][r]);
+                        } else {
+                            queue.add(queue.removeLast() + grid[c][r]);
+                        }
+                    }
+                    while (queue.size() < grid.length) {
+                        queue.addLast(EMPTY);
+                    }
+
+                    for (int r = grid.length - 1; r >= 0; r--) {
+                        grid[r][c] = queue.removeFirst();
+                    }
+                }
+            }
+            case LEFT -> {
+                for (int r = 0; r < grid.length; r++) {
+                    final LinkedList<Integer> queue = new LinkedList<>();
+                    for (int c = 0; c < grid.length; c++) {
+                        if (grid[c][r] == EMPTY) {
+                            continue;
+                        }
+
+                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
+                            queue.add(grid[r][c]);
+                        } else {
+                            queue.add(queue.removeLast() + grid[r][c]);
+                        }
+                    }
+                    while (queue.size() < grid.length) {
+                        queue.addLast(EMPTY);
+                    }
+
+                    for (int c = 0; c < grid.length; c++) {
+                        grid[r][c] = queue.removeFirst();
+                    }
+                }
+            }
+            case RIGHT -> {
+                for (int r = 0; r < grid.length; r++) {
+                    final LinkedList<Integer> queue = new LinkedList<>();
+                    for (int c = grid.length - 1; c >= 0; c--) {
+                        if (grid[c][r] == EMPTY) {
+                            continue;
+                        }
+
+                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
+                            queue.add(grid[r][c]);
+                        } else {
+                            queue.add(queue.removeLast() + grid[r][c]);
+                        }
+                    }
+                    while (queue.size() < grid.length) {
+                        queue.addLast(EMPTY);
+                    }
+
+                    for (int c = grid.length - 1; c >= 0; c--) {
+                        grid[r][c] = queue.removeFirst();
+                    }
+                }
+            }
+        }
+
+        // TODO dejan: check win / lose condition
     }
 
     public State getState() {
