@@ -1,10 +1,10 @@
 package game;
 
 import board.Board;
-import board.BoardProvider;
 import move.Move;
 
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
@@ -23,11 +23,39 @@ public class ConsoleGame implements Game {
         behaviorMap = createBehaviorMap();
     }
 
+    private Map<State, Runnable> createBehaviorMap() {
+        return new HashMap<>() {{
+            put(State.WIN, () -> messageOptional = Optional.of(WIN_MESSAGE));
+            put(State.LOSE, () -> messageOptional = Optional.of(LOSE_MESSAGE));
+            put(State.PLAY, () -> board.addRandomNumbers(RANDOM_NUMBERS_COUNT_PER_TURN));
+        }};
+    }
+
     @Override
     public void initialize() {
         initiateBoardWithMaxNumber();
-        getBoard();
         board.addRandomNumbers(RANDOM_NUMBERS_COUNT_PER_TURN);
+    }
+
+    private void initiateBoardWithMaxNumber() {
+        try {
+            tryInitializeBoardWithMaxNumber();
+        } catch (InputMismatchException e) {
+            System.out.println("Input a number!");
+            System.exit(1);
+        }
+    }
+
+    private void tryInitializeBoardWithMaxNumber() {
+        int maxNumber = askMaxNumber();
+        board = Board.getInstance(maxNumber);
+    }
+
+    private int askMaxNumber() throws InputMismatchException {
+        System.out.print("Enter maximum number to win: ");
+        int maxNumber = reader.nextInt();
+        reader.nextLine();
+        return maxNumber;
     }
 
     @Override
@@ -50,30 +78,6 @@ public class ConsoleGame implements Game {
         }
     }
 
-    private Map<State, Runnable> createBehaviorMap() {
-        return new HashMap<>() {{
-            put(State.WIN, () -> messageOptional = Optional.of(WIN_MESSAGE));
-            put(State.LOSE, () -> messageOptional = Optional.of(LOSE_MESSAGE));
-            put(State.PLAY, () -> board.addRandomNumbers(RANDOM_NUMBERS_COUNT_PER_TURN));
-        }};
-    }
-
-    private void initiateBoardWithMaxNumber() {
-        int maxNumber = askMaxNumber();
-        BoardProvider.initialize(maxNumber);
-    }
-
-    private int askMaxNumber() {
-        System.out.print("Enter maximum number to win: ");
-        int maxNumber = reader.nextInt();
-        reader.nextLine();
-        return maxNumber;
-    }
-
-    private void getBoard() {
-        board = BoardProvider.getInstance();
-    }
-
     private void printBoard() {
         clearScreen();
         printAndResetMessage();
@@ -92,8 +96,7 @@ public class ConsoleGame implements Game {
     }
 
     private boolean gameIsFinished() {
-        return messageOptional.isPresent() &&
-            (WIN_MESSAGE.equals(messageOptional.get()) || LOSE_MESSAGE.equals(messageOptional.get()));
+        return board.isWinState() || board.isLoseState();
     }
 
     private Move inputMove() {
