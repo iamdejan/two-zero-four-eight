@@ -79,6 +79,10 @@ public class Board {
         return grid[r][c] == EMPTY_CELL_VALUE;
     }
 
+    public State getState() {
+        return state;
+    }
+
     public void handleMove(final Move move) {
         move(move);
 
@@ -95,9 +99,14 @@ public class Board {
         return moveHandlerMap.get(move);
     }
 
-    private void checkLoseCondition() {
-        if (loseConditionFulfilled()) {
-            state = State.LOSE;
+    private void countEmptyCells() {
+        emptyCells = 0;
+        for (int r = 0; r < grid.length; r++) {
+            for (int c = 0; c < grid.length; c++) {
+                if (isCellEmpty(r, c)) {
+                    emptyCells++;
+                }
+            }
         }
     }
 
@@ -116,14 +125,9 @@ public class Board {
         return grid[i][j] >= maxNumber;
     }
 
-    private void countEmptyCells() {
-        emptyCells = 0;
-        for (int r = 0; r < grid.length; r++) {
-            for (int c = 0; c < grid.length; c++) {
-                if (isCellEmpty(r,c)) {
-                    emptyCells++;
-                }
-            }
+    private void checkLoseCondition() {
+        if (loseConditionFulfilled()) {
+            state = State.LOSE;
         }
     }
 
@@ -137,10 +141,6 @@ public class Board {
 
     private boolean allCellsAreFilled() {
         return emptyCells == 0;
-    }
-
-    public State getState() {
-        return state;
     }
 
     @Override
