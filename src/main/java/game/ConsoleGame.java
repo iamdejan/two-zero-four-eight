@@ -96,7 +96,7 @@ public class ConsoleGame implements Game {
     }
 
     private boolean gameIsFinished() {
-        return board.isWinState() || board.isLoseState();
+        return !State.PLAY.equals(board.getState());
     }
 
     private Move inputMove() {

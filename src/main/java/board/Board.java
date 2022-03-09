@@ -1,25 +1,32 @@
 package board;
 
 import game.State;
+import move.DownMoveHandler;
+import move.LeftMoveHandler;
 import move.Move;
+import move.MoveHandler;
+import move.RightMoveHandler;
+import move.UpMoveHandler;
 
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Board {
 
+    public static final int EMPTY_CELL_VALUE = 0;
     private static final int DEFAULT_SIZE = 4;
-    private static final int EMPTY = 0;
 
     private static Optional<Board> boardOptional = Optional.empty();
 
     private final int maxNumber;
     private final Random random;
     private final int[][] grid;
+    private final Map<Move, MoveHandler> moveHandlerMap;
 
     private State state;
     private int emptyCells;
@@ -27,10 +34,20 @@ public class Board {
     private Board(final int maxNumber, final int size) {
         this.maxNumber = maxNumber;
         this.random = new Random();
-        grid = new int[size][size];
+        this.grid = new int[size][size];
+        this.moveHandlerMap = createMoveHandlerMap();
 
-        state = State.PLAY;
-        emptyCells = size * size;
+        this.state = State.PLAY;
+        this.emptyCells = size * size;
+    }
+
+    private Map<Move, MoveHandler> createMoveHandlerMap() {
+        return new HashMap<>() {{
+            put(Move.UP, new UpMoveHandler());
+            put(Move.DOWN, new DownMoveHandler());
+            put(Move.LEFT, new LeftMoveHandler());
+            put(Move.RIGHT, new RightMoveHandler());
+        }};
     }
 
     public static Board getInstance(final int maxNumber) {
@@ -50,7 +67,7 @@ public class Board {
             while (true) {
                 int r = random.nextInt(grid.length);
                 int c = random.nextInt(grid.length);
-                if (grid[r][c] == EMPTY) {
+                if (isEmptyCell(r, c)) {
                     grid[r][c] = 2;
                     break;
                 }
@@ -58,112 +75,24 @@ public class Board {
         }
     }
 
+    private boolean isEmptyCell(int r, int c) {
+        return grid[r][c] == EMPTY_CELL_VALUE;
+    }
+
     public void handleMove(final Move move) {
-        // TODO dejan: refactor into strategy pattern
-        switch (move) {
-            case UP: {
-                for (int c = 0; c < grid.length; c++) {
-                    final LinkedList<Integer> queue = new LinkedList<>();
-                    for (int r = 0; r < grid.length; r++) {
-                        if (grid[r][c] == EMPTY) {
-                            continue;
-                        }
-
-                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
-                            queue.add(grid[r][c]);
-                        } else {
-                            queue.add(queue.removeLast() + grid[r][c]);
-                        }
-                    }
-                    while (queue.size() < grid.length) {
-                        queue.addLast(EMPTY);
-                    }
-
-                    for (int r = 0; r < grid.length; r++) {
-                        grid[r][c] = queue.removeFirst();
-                    }
-                }
-                break;
-            }
-            case DOWN: {
-                for (int c = 0; c < grid.length; c++) {
-                    final LinkedList<Integer> queue = new LinkedList<>();
-                    for (int r = grid.length - 1; r >= 0; r--) {
-                        if (grid[r][c] == EMPTY) {
-                            continue;
-                        }
-
-                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
-                            queue.add(grid[r][c]);
-                        } else {
-                            queue.add(queue.removeLast() + grid[r][c]);
-                        }
-                    }
-                    while (queue.size() < grid.length) {
-                        queue.addLast(EMPTY);
-                    }
-
-                    for (int r = grid.length - 1; r >= 0; r--) {
-                        grid[r][c] = queue.removeFirst();
-                    }
-                }
-                break;
-            }
-            case LEFT: {
-                for (int r = 0; r < grid.length; r++) {
-                    final LinkedList<Integer> queue = new LinkedList<>();
-                    for (int c = 0; c < grid.length; c++) {
-                        if (grid[r][c] == EMPTY) {
-                            continue;
-                        }
-
-                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
-                            queue.add(grid[r][c]);
-                        } else {
-                            queue.add(queue.removeLast() + grid[r][c]);
-                        }
-                    }
-                    while (queue.size() < grid.length) {
-                        queue.addLast(EMPTY);
-                    }
-
-                    for (int c = 0; c < grid.length; c++) {
-                        grid[r][c] = queue.removeFirst();
-                    }
-                }
-                break;
-            }
-            case RIGHT: {
-                for (int r = 0; r < grid.length; r++) {
-                    final LinkedList<Integer> queue = new LinkedList<>();
-                    for (int c = grid.length - 1; c >= 0; c--) {
-                        if (grid[r][c] == EMPTY) {
-                            continue;
-                        }
-
-                        if (queue.isEmpty() || queue.getLast() != grid[r][c]) {
-                            queue.add(grid[r][c]);
-                        } else {
-                            queue.add(queue.removeLast() + grid[r][c]);
-                        }
-                    }
-                    while (queue.size() < grid.length) {
-                        queue.addLast(EMPTY);
-                    }
-
-                    for (int c = grid.length - 1; c >= 0; c--) {
-                        grid[r][c] = queue.removeFirst();
-                    }
-                }
-                break;
-            }
-            default: {
-            }
-        }
+        move(move);
 
         countEmptyCells();
         checkWinCondition();
         checkLoseCondition();
+    }
+
+    private void move(final Move move) {
+        getMoveHandler(move).move(grid);
+    }
+
+    private MoveHandler getMoveHandler(Move move) {
+        return moveHandlerMap.get(move);
     }
 
     private void checkLoseCondition() {
@@ -191,7 +120,7 @@ public class Board {
         emptyCells = 0;
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
-                if (grid[i][j] == EMPTY) {
+                if (grid[i][j] == EMPTY_CELL_VALUE) {
                     emptyCells++;
                 }
             }
@@ -202,16 +131,12 @@ public class Board {
         return !isWinState() && allCellsAreFilled();
     }
 
-    private boolean allCellsAreFilled() {
-        return emptyCells == 0;
-    }
-
-    public boolean isWinState() {
+    private boolean isWinState() {
         return State.WIN.equals(state);
     }
 
-    public boolean isLoseState() {
-        return State.LOSE.equals(state);
+    private boolean allCellsAreFilled() {
+        return emptyCells == 0;
     }
 
     public State getState() {
