@@ -31,6 +31,14 @@ public class Board {
     private State state;
     private int emptyCells;
 
+    public static Board getInstance(final int maxNumber) {
+        if (boardOptional.isEmpty()) {
+            boardOptional = Optional.of(new Board(maxNumber, DEFAULT_SIZE));
+        }
+
+        return boardOptional.orElseThrow();
+    }
+
     private Board(final int maxNumber, final int size) {
         this.maxNumber = maxNumber;
         this.random = new Random();
@@ -50,14 +58,6 @@ public class Board {
         }};
     }
 
-    public static Board getInstance(final int maxNumber) {
-        if (boardOptional.isEmpty()) {
-            boardOptional = Optional.of(new Board(maxNumber, DEFAULT_SIZE));
-        }
-
-        return boardOptional.orElseThrow();
-    }
-
     public void addRandomNumbers(final int count) {
         if (allCellsAreFilled()) {
             return;
@@ -73,6 +73,10 @@ public class Board {
                 }
             }
         }
+    }
+
+    private boolean allCellsAreFilled() {
+        return emptyCells == 0;
     }
 
     private boolean isCellEmpty(final int r, final int c) {
@@ -111,9 +115,9 @@ public class Board {
     }
 
     private void checkWinCondition() {
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid.length; j++) {
-                if (winConditionFulfilledInCell(i, j)) {
+        for (int r = 0; r < grid.length; r++) {
+            for (int c = 0; c < grid.length; c++) {
+                if (winConditionFulfilledInCell(r, c)) {
                     state = State.WIN;
                     break;
                 }
@@ -121,8 +125,8 @@ public class Board {
         }
     }
 
-    private boolean winConditionFulfilledInCell(int i, int j) {
-        return grid[i][j] >= maxNumber;
+    private boolean winConditionFulfilledInCell(final int r, final int c) {
+        return grid[r][c] >= maxNumber;
     }
 
     private void checkLoseCondition() {
@@ -137,10 +141,6 @@ public class Board {
 
     private boolean isWinState() {
         return State.WIN.equals(state);
-    }
-
-    private boolean allCellsAreFilled() {
-        return emptyCells == 0;
     }
 
     @Override
