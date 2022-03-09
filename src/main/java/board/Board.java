@@ -67,7 +67,7 @@ public class Board {
             while (true) {
                 int r = random.nextInt(grid.length);
                 int c = random.nextInt(grid.length);
-                if (isEmptyCell(r, c)) {
+                if (isCellEmpty(r, c)) {
                     grid[r][c] = 2;
                     break;
                 }
@@ -75,7 +75,7 @@ public class Board {
         }
     }
 
-    private boolean isEmptyCell(int r, int c) {
+    private boolean isCellEmpty(final int r, final int c) {
         return grid[r][c] == EMPTY_CELL_VALUE;
     }
 
@@ -91,7 +91,7 @@ public class Board {
         getMoveHandler(move).move(grid);
     }
 
-    private MoveHandler getMoveHandler(Move move) {
+    private MoveHandler getMoveHandler(final Move move) {
         return moveHandlerMap.get(move);
     }
 
@@ -118,9 +118,9 @@ public class Board {
 
     private void countEmptyCells() {
         emptyCells = 0;
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid.length; j++) {
-                if (grid[i][j] == EMPTY_CELL_VALUE) {
+        for (int r = 0; r < grid.length; r++) {
+            for (int c = 0; c < grid.length; c++) {
+                if (isCellEmpty(r,c)) {
                     emptyCells++;
                 }
             }
@@ -156,7 +156,7 @@ public class Board {
         return sb.toString();
     }
 
-    private String convertNumberForFormatting(int number) {
+    private String convertNumberForFormatting(final int number) {
         if (number > 0) {
             return number + "";
         }
