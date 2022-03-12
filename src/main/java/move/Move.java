@@ -8,7 +8,7 @@ public enum Move {
     RIGHT("d"),
     UNSUPPORTED("");
 
-    public String keyboardInput;
+    private final String keyboardInput;
 
     Move(String keyboardInput) {
         this.keyboardInput = keyboardInput;

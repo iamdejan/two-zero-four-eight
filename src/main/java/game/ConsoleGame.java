@@ -1,6 +1,7 @@
 package game;
 
 import board.Board;
+import board.State;
 import move.Move;
 
 import java.util.HashMap;

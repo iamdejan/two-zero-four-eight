@@ -1,6 +1,5 @@
 package board;
 
-import game.State;
 import move.DownMoveHandler;
 import move.LeftMoveHandler;
 import move.Move;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 public class Board {
 
     public static final int EMPTY_CELL_VALUE = 0;
-    private static final int DEFAULT_SIZE = 4;
+    protected static final int DEFAULT_SIZE = 4;
 
     private static Optional<Board> boardOptional = Optional.empty();
 
@@ -28,8 +27,8 @@ public class Board {
     private final int[][] grid;
     private final Map<Move, MoveHandler> moveHandlerMap;
 
+    protected int emptyCells;
     private State state;
-    private int emptyCells;
 
     public static Board getInstance(final int maxNumber) {
         if (boardOptional.isEmpty()) {
@@ -37,6 +36,10 @@ public class Board {
         }
 
         return boardOptional.orElseThrow();
+    }
+
+    protected static void reset() {
+        boardOptional = Optional.empty();
     }
 
     private Board(final int maxNumber, final int size) {
@@ -69,6 +72,7 @@ public class Board {
                 int c = random.nextInt(grid.length);
                 if (isCellEmpty(r, c)) {
                     grid[r][c] = 2;
+                    emptyCells--;
                     break;
                 }
             }
@@ -114,7 +118,7 @@ public class Board {
         }
     }
 
-    private void checkWinCondition() {
+    protected void checkWinCondition() {
         for (int r = 0; r < grid.length; r++) {
             for (int c = 0; c < grid.length; c++) {
                 if (winConditionFulfilledInCell(r, c)) {
@@ -129,7 +133,7 @@ public class Board {
         return grid[r][c] >= maxNumber;
     }
 
-    private void checkLoseCondition() {
+    protected void checkLoseCondition() {
         if (loseConditionFulfilled()) {
             state = State.LOSE;
         }
