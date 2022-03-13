@@ -29,6 +29,7 @@ public class Board {
 
     protected int emptyCells;
     private State state;
+    private boolean validMove;
 
     public static Board getInstance(final int maxNumber) {
         if (boardOptional.isEmpty()) {
@@ -50,6 +51,7 @@ public class Board {
 
         this.state = State.PLAY;
         this.emptyCells = size * size;
+        validMove = true;
     }
 
     private Map<Move, MoveHandler> createMoveHandlerMap() {
@@ -61,26 +63,36 @@ public class Board {
         }};
     }
 
-    public void addRandomNumbers(final int count) {
-        if (allCellsAreFilled()) {
+    public void addRandomNumbersIfValidMove(int count) {
+        if (invalidMove()) {
             return;
         }
 
-        for (int i = 1; i <= count; i++) {
-            while (true) {
-                int r = random.nextInt(grid.length);
-                int c = random.nextInt(grid.length);
-                if (isCellEmpty(r, c)) {
-                    grid[r][c] = 2;
-                    emptyCells--;
-                    break;
-                }
-            }
-        }
+        addRandomNumbers(count);
+    }
+
+    private boolean invalidMove() {
+        return !validMove;
     }
 
     private boolean allCellsAreFilled() {
         return emptyCells == 0;
+    }
+
+    public void addRandomNumbers(int count) {
+        if (allCellsAreFilled()) {
+            return;
+        }
+
+        while (count > 0) {
+            int r = random.nextInt(grid.length);
+            int c = random.nextInt(grid.length);
+            if (isCellEmpty(r, c)) {
+                grid[r][c] = 2;
+                emptyCells--;
+                count--;
+            }
+        }
     }
 
     private boolean isCellEmpty(final int r, final int c) {
@@ -100,11 +112,29 @@ public class Board {
     }
 
     private void move(final Move move) {
+        final int[][] originalGrid = deepCopyGrid(grid);
         getMoveHandler(move).move(grid);
+        if (gridHasChanged(originalGrid, grid)) {
+            validMove = false;
+        }
+    }
+
+    private int[][] deepCopyGrid(final int[][] grid) {
+        final int[][] result = new int[grid.length][grid.length];
+        for (int r = 0; r < grid.length; r++) {
+            for (int c = 0; c < grid.length; c++) {
+                result[r][c] = grid[r][c];
+            }
+        }
+        return result;
     }
 
     private MoveHandler getMoveHandler(final Move move) {
         return moveHandlerMap.get(move);
+    }
+
+    private boolean gridHasChanged(final int[][] originalGrid, final int[][] currentGrid) {
+        return Arrays.deepEquals(originalGrid, currentGrid);
     }
 
     private void countEmptyCells() {

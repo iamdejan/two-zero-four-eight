@@ -49,7 +49,7 @@ public class TestBoard {
         final int count = 2;
 
         // When
-        board.addRandomNumbers(count);
+        board.addRandomNumbersIfValidMove(count);
 
         // Then
         assertEquals(board.emptyCells, Board.DEFAULT_SIZE * Board.DEFAULT_SIZE - count);
@@ -61,7 +61,7 @@ public class TestBoard {
         final int maxNumber = 2048;
         final Board board = Board.getInstance(maxNumber);
         final int count = 2;
-        board.addRandomNumbers(count);
+        board.addRandomNumbersIfValidMove(count);
 
         // When
         board.handleMove(Move.UP);
@@ -73,12 +73,30 @@ public class TestBoard {
     }
 
     @Test
+    public void handleMove_eventuallyInvalidMove_boardWillNotChange() {
+        // Given
+        final int maxNumber = 2048;
+        final Board board = Board.getInstance(maxNumber);
+        final int count = 2;
+        board.addRandomNumbersIfValidMove(count);
+
+        // When
+        for (int time = 1; time <= 5; time++) {
+            board.handleMove(Move.UP);
+        }
+
+        // Then
+        assertEquals(board.getState(), State.PLAY);
+        assertNotNull(board.toString());
+    }
+
+    @Test
     public void checkWinCondition_validWinCondition_stateChangedToWin() {
         // Given
         final int maxNumber = 2;
         final Board board = Board.getInstance(maxNumber);
         final int count = 2;
-        board.addRandomNumbers(count);
+        board.addRandomNumbersIfValidMove(count);
 
         // When
         board.checkWinCondition();

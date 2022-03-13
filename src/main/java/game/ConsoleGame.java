@@ -28,7 +28,7 @@ public class ConsoleGame implements Game {
         return new HashMap<>() {{
             put(State.WIN, () -> messageOptional = Optional.of(WIN_MESSAGE));
             put(State.LOSE, () -> messageOptional = Optional.of(LOSE_MESSAGE));
-            put(State.PLAY, () -> board.addRandomNumbers(RANDOM_NUMBERS_COUNT_PER_TURN));
+            put(State.PLAY, () -> board.addRandomNumbersIfValidMove(RANDOM_NUMBERS_COUNT_PER_TURN));
         }};
     }
 
